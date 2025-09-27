@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.model.Student;
-import com.example.crossPlatform.model.TaskType;
 import com.example.crossPlatform.model.TimeEntry;
 
 import jakarta.validation.Valid;

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.crossPlatform.enums.RiskLevel;
 import com.example.crossPlatform.model.DeadLinePredictionDTO;
-import com.example.crossPlatform.model.RiskLevel;
 
 import jakarta.validation.Valid;
 
