@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.example.crossPlatform.enums.RiskLevel;
 
-import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
