@@ -21,14 +21,14 @@ import com.example.crossPlatform.model.TimeEntry;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/timeEntries")
 public class TimeEntryController {
     private List<TimeEntry> timeEntries = new ArrayList<>(Arrays.asList(
     new TimeEntry(1l, new Student(1l, "Фисенко Д.Р.", "2231121", null), TaskType.CODING , "Кусовая работа", LocalDateTime.now(), LocalDateTime.now(), false),
     new TimeEntry(2l, new Student(2l, "Зубков Е.В.", "2201117", null), TaskType.EXAM_PREP, "Экзамен", LocalDateTime.now(), LocalDateTime.now(), true)
     ));
 
-    @GetMapping("/timeEntries")
+    @GetMapping
     public List<TimeEntry> getTimeEntries() {
         return timeEntries;
     }

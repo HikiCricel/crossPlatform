@@ -11,7 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,15 +27,19 @@ public class TimeEntry {
     private Long id;
     @ManyToOne
     private Student student;
+    @Size(min = 3, max = 500, message = "tasktype")
+    @Column(nullable = false, length = 100)
     private TaskType type;
-    @NotBlank
     @Size(min = 3, max = 500, message = "description")
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String description;
-    @Column(nullable = false, unique = true, length = 100)
+    @Size(min = 3, max = 500, message = "starttime")
+    @Column(nullable = false, length = 100)
     private LocalDateTime start;
-    @Column(nullable = false, unique = true, length = 100)
+    @Size(min = 3, max = 500, message = "endtime")
+    @Column(nullable = false, length = 100)
     private LocalDateTime timeEnd;
-    @Column(nullable = false, unique = true, length = 100)
+    @Size(min = 3, max = 500, message = "isbillable")
+    @Column(nullable = false, length = 100)
     private boolean isBillable; // учёт времени
 }

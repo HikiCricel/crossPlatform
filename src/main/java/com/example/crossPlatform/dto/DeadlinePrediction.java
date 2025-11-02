@@ -1,4 +1,4 @@
-package com.example.crossPlatform.model;
+package com.example.crossPlatform.dto;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class DeadLinePredictionDTO {
+public class DeadlinePrediction {
     private String subject;
     private LocalDateTime deadline;
     private Double hoursLeft;

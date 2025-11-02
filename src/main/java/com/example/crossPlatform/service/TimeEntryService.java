@@ -4,9 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.model.TimeEntry;
-import com.example.crossPlatform.repository.StudentRepository;
 import com.example.crossPlatform.repository.TimeEntryRepository;
 
 @Service
