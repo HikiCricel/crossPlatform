@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
@@ -26,6 +27,7 @@ public class TimeEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
+    @JoinColumn(name = "student_id")
     private Student student;
     @Size(min = 3, max = 500, message = "tasktype")
     @Column(nullable = false, length = 100)
@@ -35,11 +37,10 @@ public class TimeEntry {
     private String description;
     @Size(min = 3, max = 500, message = "starttime")
     @Column(nullable = false, length = 100)
-    private LocalDateTime start;
+    private LocalDateTime timeStart;
     @Size(min = 3, max = 500, message = "endtime")
     @Column(nullable = false, length = 100)
     private LocalDateTime timeEnd;
-    @Size(min = 3, max = 500, message = "isbillable")
-    @Column(nullable = false, length = 100)
+    @Column()
     private boolean isBillable; // учёт времени
 }

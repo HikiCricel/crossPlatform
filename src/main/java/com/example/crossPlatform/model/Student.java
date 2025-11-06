@@ -2,9 +2,8 @@ package com.example.crossPlatform.model;
 
 import java.util.List;
 
-
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,7 +28,6 @@ public class Student {
     @Size(min = 3, max = 50, message = "group")
     @Column(nullable = false, length = 100, name = "group_name")
     private String group;
-    @ElementCollection
-    @OneToMany()
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeEntry> recentEntries;
 }
