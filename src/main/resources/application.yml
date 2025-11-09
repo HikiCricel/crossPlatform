@@ -8,23 +8,37 @@ spring:
 spring:
     config:
         activate:
-            on profile: dev
-    datasource:
-        url: jdbc:postgresql://localhost:5432/students_db
-        username: postgres
-        password: 2E6Z1k8x
-        driver-class-name: org.postgresql.Driver
-    jpa:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-        hibernate:
-            ddl-auto: create-drop
+            on-profile: dev
 server:
     port: 8080
 ---
 spring:
     config:
         activate:
-            on profile: production
+            on-profile: production
 server:
     port: 9001
 ---
+spring:
+    datasource:
+        url: jdbc:postgresql://localhost:5432/studends_db
+        username: postgres
+        password: ${pass}
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+            ddl-auto: update
+---
+jwt:
+    secret: 66f65f5f97904ad05148f5a25c3f24adabf0d0f9b7c5ad09344393a55b8deeef
+    access:
+        duration:
+            minutes: 5
+            seconds: 300
+        cookie-name: access-token
+    refresh:
+        duration:
+            days: 7
+            seconds: 604800
+        cookie-name: refresh-token
