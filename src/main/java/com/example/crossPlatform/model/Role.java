@@ -30,7 +30,7 @@ public class Role implements GrantedAuthority {
     @ManyToMany()
     private Set<Permission> permissions;
     @OneToMany()
-    private User user;
+    private Set<User> users;
 
     @Override
     public String getAuthority(){
