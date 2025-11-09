@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +24,7 @@ import com.example.crossPlatform.service.TimeEntryService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/timeEntries")
+@RequestMapping("/api")
 public class TimeEntryController {
     private final TimeEntryService timeEntryService;
 
@@ -31,7 +32,7 @@ public class TimeEntryController {
         this.timeEntryService = timeEntryService;
     }
 
-    @PostMapping
+    @PostMapping("/timeEntries")
     public ResponseEntity<TimeEntry> addTimEntity(@RequestBody @Valid TimeEntry timeEntry) {
         TimeEntry newTimeEntry = timeEntryService.create(timeEntry);
         return ResponseEntity.status(HttpStatus.CREATED).body(newTimeEntry);
@@ -42,7 +43,17 @@ public class TimeEntryController {
         return ResponseEntity.ok().body(timeEntryService.getById(id));
     }
 
-    @GetMapping("/filter")
+    @PutMapping("/timeEntries/{id}")
+    public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody TimeEntry timeEntry) {
+        TimeEntry updated = timeEntryService.update(id, timeEntry);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/timeEntries/filter")
     public ResponseEntity<Object> getByFilter(
         @RequestParam(required = false)Student student,
         @RequestParam(required = false)TaskType type,

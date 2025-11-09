@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/api")
 public class StudentController {
 
     private final StudentService studentService;
@@ -37,7 +37,7 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newStudent);
     }
 
-    @GetMapping
+    @GetMapping("/students")
     public List<Student> getStudents(@RequestParam(required = false) String name) {
         if (name == null)
             return studentService.getAll();
@@ -68,7 +68,7 @@ public class StudentController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/students/filter")
     public ResponseEntity<Object> getByFilter(
         @RequestParam(required = false) String name,
         @RequestParam(required = false) String title,
