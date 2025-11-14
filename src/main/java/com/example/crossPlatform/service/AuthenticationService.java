@@ -10,11 +10,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.crossPlatform.dto.ChangePasswordRequest;
 import com.example.crossPlatform.dto.LoginRequest;
 import com.example.crossPlatform.dto.LoginResponse;
 import com.example.crossPlatform.dto.UserLogged;
@@ -37,6 +40,7 @@ public class AuthenticationService {
     public final CookieUtil cookieUtil;
     public final AuthenticationManager authenticationManager;
     public final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${jwt.access.duration.minutes}")
     private long accessDurationMinute;
@@ -113,7 +117,7 @@ public class AuthenticationService {
         return ResponseEntity.ok().headers(headers).body(loginResponse);
     }
 
-    public ResponseEntity<LoginResponse> logout(String access, String refresh) {
+    public ResponseEntity<LoginResponse> logout(String access) {
         SecurityContextHolder.clearContext();
         User user = userService.getUser(jwtTokenProvider.getUsername(access));
         revokeAllTokens(user);
@@ -130,5 +134,34 @@ public class AuthenticationService {
         }
         User user = userService.getUser(auth.getName());
         return UserMapper.userToUserLoggedDTO(user);
+    }
+
+    public ResponseEntity <LoginResponse> changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication instanceof AnonymousAuthenticationToken){
+            throw new RuntimeException("User is not authenticated");
+        }
+
+        User user = userService.getUser(authentication.getName());
+
+        if(!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Current password is invalid");
+        }
+        if (!request.newPassword().matches(request.newAgain())) {
+            throw new BadCredentialsException("New passwords don't match each other");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userService.saveUser(user);
+
+        revokeAllTokens(user);
+        SecurityContextHolder.clearContext();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, cookieUtil.deleteAccessCookie().toString());
+        headers.add(HttpHeaders.SET_COOKIE, cookieUtil.deleteRefreshCookie().toString());
+
+        return ResponseEntity.ok().headers(headers).body(new LoginResponse(false, null));
     }
 }

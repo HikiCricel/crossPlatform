@@ -39,4 +39,8 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User with username " + username + "not found"));
         return UserMapper.userToUserDTO(user);
     }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
 }
