@@ -32,7 +32,7 @@ private final AuthenticationService authService;
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@CookieValue(name = "refresh-token", required = true) String refresh) {
+    public ResponseEntity<LoginResponse> refresh(@CookieValue(name = "refresh-token", required = false) String refresh) {
         return authService.refresh(refresh);
     }
 
