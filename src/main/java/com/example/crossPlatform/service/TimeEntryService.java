@@ -11,7 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.crossPlatform.dto.TimeEntryRequestDTO;
+import com.example.crossPlatform.dto.TimeEntryResponceDTO;
 import com.example.crossPlatform.enums.TaskType;
+import com.example.crossPlatform.mapper.TimeEntryMapper;
 import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.model.TimeEntry;
 import com.example.crossPlatform.repository.TimeEntryRepository;
@@ -37,30 +40,27 @@ public class TimeEntryService {
 
     @Transactional
     @CacheEvict(value = "timeEntry", allEntries = true)
-    public TimeEntry create(TimeEntry timeEntry) {
-        return timeEntryRepository.save(timeEntry);
+    public TimeEntryResponceDTO create(TimeEntryRequestDTO request) {
+        TimeEntry timeEntry = timeEntryRepository.save(TimeEntryMapper.timeEntryRequestToTimeEntry(request));
+        return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
     }
 
     @Cacheable(value = "timeEntry", key = "#id")
-    public TimeEntry getById(Long id) {
-        // for (Student student : students) {
-        // if (student.getId().equals(id)) {
-        // return studentRepository.findById(id).orElse(null);
-        // }
-        // }
-        // return null;
-        return timeEntryRepository.findById(id).orElse(null);
+    public TimeEntryResponceDTO getById(Long id) {
+        TimeEntry timeEntry = timeEntryRepository.findById(id).orElse(null);
+        return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
     }
 
     @Transactional
     @Caching(evict = { @CacheEvict(value = "timeEntries", allEntries = true),
             @CacheEvict(value = "timeEntry", key = "#id") })
-    public TimeEntry update(Long id, TimeEntry timeEntry) {
-        return timeEntryRepository.findById(id).map(existingTimeEntry -> {
-            existingTimeEntry.setTimeStart(timeEntry.getTimeStart());
-            existingTimeEntry.setTimeEnd(timeEntry.getTimeEnd());
+    public TimeEntryResponceDTO update(Long id, TimeEntryRequestDTO request) {
+        TimeEntry timeEntry = timeEntryRepository.findById(id).map(existingTimeEntry -> {
+            // existingTimeEntry.setTimeStart(request.getTimeStart());
+            // existingTimeEntry.setTimeEnd(request.getTimeEnd());
             return timeEntryRepository.save(existingTimeEntry);
         }).orElse(null);
+        return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
     }
 
     @Transactional
@@ -76,4 +76,6 @@ public class TimeEntryService {
     public Page<TimeEntry> getByFilter(Student student, TaskType type, LocalDateTime dateTimeStart, LocalDateTime dateTimeEnd, boolean expression, Pageable pageable){
         return timeEntryRepository.findAll(TimeEntrySpecifications.filter(type, student, dateTimeStart, dateTimeEnd, expression), pageable);
     }
+
+    
 }

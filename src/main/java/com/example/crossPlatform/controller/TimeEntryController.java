@@ -8,17 +8,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.crossPlatform.dto.TimeEntryRequestDTO;
+import com.example.crossPlatform.dto.TimeEntryResponceDTO;
 import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.model.Student;
-import com.example.crossPlatform.model.TimeEntry;
 import com.example.crossPlatform.service.TimeEntryService;
 
 import jakarta.validation.Valid;
@@ -33,19 +34,18 @@ public class TimeEntryController {
     }
 
     @PostMapping("/timeEntries")
-    public ResponseEntity<TimeEntry> addTimEntity(@RequestBody @Valid TimeEntry timeEntry) {
-        TimeEntry newTimeEntry = timeEntryService.create(timeEntry);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newTimeEntry);
+    public ResponseEntity<TimeEntryResponceDTO> addTimEntity(@RequestBody @Valid TimeEntryRequestDTO timeEntry) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryService.create(timeEntry));
     }
 
     @GetMapping("/timeEntries/{id}")
-    public ResponseEntity<TimeEntry> getTimeEntry(@PathVariable Long id) {
+    public ResponseEntity<TimeEntryResponceDTO> getTimeEntry(@PathVariable Long id) {
         return ResponseEntity.ok().body(timeEntryService.getById(id));
     }
 
-    @PutMapping("/timeEntries/{id}")
-    public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody TimeEntry timeEntry) {
-        TimeEntry updated = timeEntryService.update(id, timeEntry);
+    @PatchMapping("/timeEntries/{id}")
+    public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody TimeEntryRequestDTO timeEntry) {
+        TimeEntryResponceDTO updated = timeEntryService.update(id, timeEntry);
         if (updated != null) {
             return ResponseEntity.ok(updated);
         } else {
