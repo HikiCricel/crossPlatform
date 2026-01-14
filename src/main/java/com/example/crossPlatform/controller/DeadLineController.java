@@ -1,51 +1,66 @@
 package com.example.crossPlatform.controller;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.crossPlatform.dto.DeadlinePrediction;
-import com.example.crossPlatform.enums.RiskLevel;
+import com.example.crossPlatform.dto.DeadlineRequestDTO;
+import com.example.crossPlatform.dto.DeadlineResponseDTO;
+import com.example.crossPlatform.service.DeadlineService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
-public class DeadLineController {
-    private List<DeadlinePrediction> deadLines = new ArrayList<>(Arrays.asList(
-    new DeadlinePrediction("Программирование", LocalDateTime.now(), 228.14, RiskLevel.MEDIUM),
-    new DeadlinePrediction("Физика", LocalDateTime.now(), 14.88, RiskLevel.HIGH)    
-    ));
+public class DeadlineController {
+    private final DeadlineService deadlineService;
+    public DeadlineController(DeadlineService deadlineService){
+        this.deadlineService = deadlineService;
+    }
+
+    @PostMapping("/deadlines")
+    public ResponseEntity<DeadlineResponseDTO> addDeadline(@RequestBody @Valid DeadlineRequestDTO deadline) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(deadlineService.create(deadline));
+    }
 
     @GetMapping("/deadLines")
-    public List<DeadlinePrediction> getDeadLines() {
-        return deadLines;
+    public List<DeadlineResponseDTO> getDeadlines(@RequestParam(required = false) String type) {
+        if(type == null) 
+            return deadlineService.getAll();
+        else 
+            return deadlineService.getAllByType(type);
     }
 
     @GetMapping("/deadLines/{id}")
-    public ResponseEntity<DeadlinePrediction> getDeadLine(@PathVariable String subject) {
-        for (DeadlinePrediction deadLine : deadLines) {
-            if (deadLine.getSubject().equals(subject)) {
-                return ResponseEntity.ok(deadLine);
-            }
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<DeadlineResponseDTO> getDeadline(@PathVariable Long id) {
+        return ResponseEntity.ok().body(deadlineService.getById(id));
     }
 
-    @PostMapping("/deadLines")
-    public ResponseEntity<DeadlinePrediction> addDeadLine(@RequestBody @Valid DeadlinePrediction deadLine) {
-        deadLine.setRisk(RiskLevel.LOW);
-        deadLines.add(deadLine);
-        return ResponseEntity.status(HttpStatus.CREATED).body(deadLine);
+    @PatchMapping("/deadlines/{id}")
+    public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody DeadlineRequestDTO deadline) {
+        DeadlineResponseDTO updated = deadlineService.update(id, deadline);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/deadlines/{id}")
+    public ResponseEntity<Void> deleteDeadline(@PathVariable Long id){
+        if(deadlineService.deleteById(id)){
+            ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().build();
     }
 }
