@@ -1,17 +1,17 @@
 package com.example.crossPlatform.mapper;
 
 import com.example.crossPlatform.dto.TimeEntryRequestDTO;
-import com.example.crossPlatform.dto.TimeEntryResponceDTO;
+import com.example.crossPlatform.dto.TimeEntryResponseDTO;
 import com.example.crossPlatform.model.TimeEntry;
 
 public class TimeEntryMapper {
     public static TimeEntry timeEntryRequestToTimeEntry(TimeEntryRequestDTO request) {
-        return new TimeEntry(null, request.student(), request.type(), request.description(), null, null,
+        return new TimeEntry(null, null, request.type(), request.subject(), request.description(), null, null, 0.0,
                 request.isBillable());
     }
 
-    public static TimeEntryResponceDTO timeEntryToTimeEntryResponceDTO(TimeEntry timeEntry) {
-        return new TimeEntryResponceDTO(timeEntry.getId(), timeEntry.getStudent(), timeEntry.getType(),
+    public static TimeEntryResponseDTO timeEntryToTimeEntryResponseDTO(TimeEntry timeEntry) {
+        return new TimeEntryResponseDTO(timeEntry.getId(), timeEntry.getStudent().getId(), timeEntry.getType(),
                 timeEntry.getDescription(), timeEntry.getTimeStart(), timeEntry.getTimeEnd(), timeEntry.isBillable());
     }
 }

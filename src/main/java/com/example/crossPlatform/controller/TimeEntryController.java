@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.crossPlatform.dto.TimeEntryRequestDTO;
-import com.example.crossPlatform.dto.TimeEntryResponceDTO;
+import com.example.crossPlatform.dto.TimeEntryResponseDTO;
 import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.service.TimeEntryService;
@@ -34,18 +34,18 @@ public class TimeEntryController {
     }
 
     @PostMapping("/timeEntries")
-    public ResponseEntity<TimeEntryResponceDTO> addTimEntity(@RequestBody @Valid TimeEntryRequestDTO timeEntry) {
+    public ResponseEntity<TimeEntryResponseDTO> addTimEntity(@RequestBody @Valid TimeEntryRequestDTO timeEntry) {
         return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryService.create(timeEntry));
     }
 
     @GetMapping("/timeEntries/{id}")
-    public ResponseEntity<TimeEntryResponceDTO> getTimeEntry(@PathVariable Long id) {
+    public ResponseEntity<TimeEntryResponseDTO> getTimeEntry(@PathVariable Long id) {
         return ResponseEntity.ok().body(timeEntryService.getById(id));
     }
 
     @PatchMapping("/timeEntries/{id}")
     public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody TimeEntryRequestDTO timeEntry) {
-        TimeEntryResponceDTO updated = timeEntryService.update(id, timeEntry);
+        TimeEntryResponseDTO updated = timeEntryService.update(id, timeEntry);
         if (updated != null) {
             return ResponseEntity.ok(updated);
         } else {
@@ -55,21 +55,21 @@ public class TimeEntryController {
 
     @GetMapping("/timeEntries/filter")
     public ResponseEntity<Object> getByFilter(
-        @RequestParam(required = false)Student student,
-        @RequestParam(required = false)TaskType type,
-        @RequestParam(required = false)LocalDateTime dateTimeStart,
-        @RequestParam(required = false)LocalDateTime dateTimeEnd,
-        @RequestParam(required = false)boolean expression,
-        @PageableDefault(page = 0, size = 10, sort = "title")Pageable pageable){
-            return ResponseEntity.ok(timeEntryService.getByFilter(student, type, dateTimeStart, dateTimeEnd, expression, pageable));
+            @RequestParam(required = false) Student student,
+            @RequestParam(required = false) TaskType type,
+            @RequestParam(required = false) LocalDateTime dateTimeStart,
+            @RequestParam(required = false) LocalDateTime dateTimeEnd,
+            @RequestParam(required = false) boolean expression,
+            @PageableDefault(page = 0, size = 10, sort = "title") Pageable pageable) {
+        return ResponseEntity
+                .ok(timeEntryService.getByFilter(student, type, dateTimeStart, dateTimeEnd, expression, pageable));
     }
 
     @DeleteMapping("/timeEntries/{id}")
-    public ResponseEntity<Void> deleteTimEntity(@PathVariable Long id){
-        if(timeEntryService.deleteById(id)){
+    public ResponseEntity<Void> deleteTimEntity(@PathVariable Long id) {
+        if (timeEntryService.deleteById(id)) {
             ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok().build();
     }
 }
-

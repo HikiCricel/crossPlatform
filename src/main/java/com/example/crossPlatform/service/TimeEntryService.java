@@ -12,21 +12,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.crossPlatform.dto.TimeEntryRequestDTO;
-import com.example.crossPlatform.dto.TimeEntryResponceDTO;
+import com.example.crossPlatform.dto.TimeEntryResponseDTO;
 import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.mapper.TimeEntryMapper;
 import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.model.TimeEntry;
+import com.example.crossPlatform.repository.StudentRepository;
 import com.example.crossPlatform.repository.TimeEntryRepository;
 import com.example.crossPlatform.specifications.TimeEntrySpecifications;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 @Transactional(readOnly = true)
 public class TimeEntryService {
     private final TimeEntryRepository timeEntryRepository;
+    private final StudentRepository studentRepository;
 
-    public TimeEntryService(TimeEntryRepository timeEntryRepository) {
+    public TimeEntryService(TimeEntryRepository timeEntryRepository, StudentRepository studentRepository) {
         this.timeEntryRepository = timeEntryRepository;
+        this.studentRepository = studentRepository;
     }
 
     @Cacheable(value = "timeEntries", key = "#root.methodName")
@@ -38,33 +43,56 @@ public class TimeEntryService {
         return timeEntryRepository.findAllByDescription(description);
     }
 
+    public List<TimeEntry> getAllByType(TaskType type) {
+        return timeEntryRepository.findAllByType(type);
+    }
+
+    public List<TimeEntry> getAllByStudent(Student student) {
+        return timeEntryRepository.findAllByStudent(student);
+    }
+
     @Transactional
     @CacheEvict(value = "timeEntry", allEntries = true)
-    public TimeEntryResponceDTO create(TimeEntryRequestDTO request) {
-        TimeEntry timeEntry = timeEntryRepository.save(TimeEntryMapper.timeEntryRequestToTimeEntry(request));
-        return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
+    public TimeEntryResponseDTO create(TimeEntryRequestDTO request) {
+        Student student = studentRepository.findById(request.studentId())
+                .orElseThrow(() -> new EntityNotFoundException("Student not found with id: " + request.studentId()));
+        TimeEntry timeEntry = new TimeEntry();
+        timeEntry.setStudent(student);
+        timeEntry.setType(request.type());
+        timeEntry.setSubject(request.subject());
+        timeEntry.setTimeStart(LocalDateTime.now());
+        timeEntry.setTimeEnd(null);
+        timeEntry.setDuration(0.0);
+        timeEntry.setDescription("Auto-created entry");
+        timeEntry.setBillable(false);
+
+        TimeEntry saved = timeEntryRepository.save(timeEntry);
+        return TimeEntryMapper.timeEntryToTimeEntryResponseDTO(saved);
+        // TimeEntry timeEntry = timeEntryRepository.save(TimeEntryMapper.timeEntryRequestToTimeEntry(request));
+        // return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
     }
 
     @Cacheable(value = "timeEntry", key = "#id")
-    public TimeEntryResponceDTO getById(Long id) {
+    public TimeEntryResponseDTO getById(Long id) {
         TimeEntry timeEntry = timeEntryRepository.findById(id).orElse(null);
-        return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
+        return TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry);
     }
 
     @Transactional
     @Caching(evict = { @CacheEvict(value = "timeEntries", allEntries = true),
             @CacheEvict(value = "timeEntry", key = "#id") })
-    public TimeEntryResponceDTO update(Long id, TimeEntryRequestDTO request) {
+    public TimeEntryResponseDTO update(Long id, TimeEntryRequestDTO request) {
         TimeEntry timeEntry = timeEntryRepository.findById(id).map(existingTimeEntry -> {
             // existingTimeEntry.setTimeStart(request.getTimeStart());
             // existingTimeEntry.setTimeEnd(request.getTimeEnd());
             return timeEntryRepository.save(existingTimeEntry);
         }).orElse(null);
-        return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
+        return TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry);
     }
 
     @Transactional
-    @Caching(evict = {@CacheEvict(value = "timeEntries", allEntries = true), @CacheEvict(value = "timeEntry", key = "#id")})
+    @Caching(evict = { @CacheEvict(value = "timeEntries", allEntries = true),
+            @CacheEvict(value = "timeEntry", key = "#id") })
     public boolean deleteById(Long id) {
         if (timeEntryRepository.existsById(id)) {
             timeEntryRepository.deleteById(id);
@@ -73,9 +101,10 @@ public class TimeEntryService {
         return false;
     }
 
-    public Page<TimeEntry> getByFilter(Student student, TaskType type, LocalDateTime dateTimeStart, LocalDateTime dateTimeEnd, boolean expression, Pageable pageable){
-        return timeEntryRepository.findAll(TimeEntrySpecifications.filter(type, student, dateTimeStart, dateTimeEnd, expression), pageable);
+    public Page<TimeEntry> getByFilter(Student student, TaskType type, LocalDateTime dateTimeStart,
+            LocalDateTime dateTimeEnd, boolean expression, Pageable pageable) {
+        return timeEntryRepository.findAll(
+                TimeEntrySpecifications.filter(type, student, dateTimeStart, dateTimeEnd, expression), pageable);
     }
 
-    
 }

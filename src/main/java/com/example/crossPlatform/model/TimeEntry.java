@@ -32,15 +32,18 @@ public class TimeEntry {
     @Size(min = 3, max = 500, message = "tasktype")
     @Column(nullable = false, length = 100)
     private TaskType type;
+    @Size(min = 2, max = 100, message = "subject")
+    @Column(nullable = false, length = 100)
+    private String subject;
     @Size(min = 3, max = 500, message = "description")
     @Column(nullable = false, length = 100)
     private String description;
-    @Size(min = 3, max = 500, message = "starttime")
     @Column(nullable = false, length = 100)
     private LocalDateTime timeStart;
-    @Size(min = 3, max = 500, message = "endtime")
-    @Column(nullable = false, length = 100)
+    @Column(nullable = true, length = 100)
     private LocalDateTime timeEnd;
+    @Column(nullable = true, length = 100)
+    private Double duration;
     @Column()
     private boolean isBillable; // учёт времени
 }
