@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.crossPlatform.dto.StudentRequestDTO;
-import com.example.crossPlatform.dto.StudentResponceDTO;
+import com.example.crossPlatform.dto.StudentResponseDTO;
 import com.example.crossPlatform.mapper.StudentMapper;
 import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.repository.StudentRepository;
@@ -27,46 +27,46 @@ public class StudentService {
     private final StudentRepository studentRepository;
 
     @Cacheable(value = "student", key = "#root.methodName")
-    public List<StudentResponceDTO> getAll() {
+    public List<StudentResponseDTO> getAll() {
         List<Student> students = studentRepository.findAll();
-        List<StudentResponceDTO> studentsResponce = new ArrayList<>();
+        List<StudentResponseDTO> studentsResponce = new ArrayList<>();
         for (Student student : students) {
-            studentsResponce.add(StudentMapper.studentToStudentResponceDTO(student));
+            studentsResponce.add(StudentMapper.studentToStudentResponseDTO(student));
         }
         return studentsResponce;
     }
 
-    public List<StudentResponceDTO> getAllByGroup(String group) {
+    public List<StudentResponseDTO> getAllByGroup(String group) {
         List<Student> students = studentRepository.findAllByGroup(group);
-        List<StudentResponceDTO> studentsResponce = new ArrayList<>();
+        List<StudentResponseDTO> studentsResponce = new ArrayList<>();
         for (Student student : students) {
-            studentsResponce.add(StudentMapper.studentToStudentResponceDTO(student));
+            studentsResponce.add(StudentMapper.studentToStudentResponseDTO(student));
         }
         return studentsResponce;
     }
 
     @CacheEvict(value = "student", allEntries = true)
     @Transactional
-    public StudentResponceDTO create(StudentRequestDTO request) {
+    public StudentResponseDTO create(StudentRequestDTO request) {
         Student student = studentRepository.save(StudentMapper.studentRequestToStudent(request));
-        return StudentMapper.studentToStudentResponceDTO(student);
+        return StudentMapper.studentToStudentResponseDTO(student);
     }
 
     @Cacheable(value = "student", key = "#id")
-    public StudentResponceDTO getById(Long id) {
+    public StudentResponseDTO getById(Long id) {
         Student student = studentRepository.findById(id).orElse(null);
-        return StudentMapper.studentToStudentResponceDTO(student);
+        return StudentMapper.studentToStudentResponseDTO(student);
     }
 
     @Transactional
     @Caching(evict = { @CacheEvict(value = "student", allEntries = true), @CacheEvict(value = "student", key = "#id") })
-    public StudentResponceDTO update(Long id, StudentRequestDTO request) {
+    public StudentResponseDTO update(Long id, StudentRequestDTO request) {
         Student student = studentRepository.findById(id).map(existingStudent -> {
             existingStudent.setName(request.name());
             existingStudent.setGroup(request.group());
             return studentRepository.save(existingStudent);
         }).orElse(null);
-        return StudentMapper.studentToStudentResponceDTO(student);
+        return StudentMapper.studentToStudentResponseDTO(student);
     }
 
     @Transactional

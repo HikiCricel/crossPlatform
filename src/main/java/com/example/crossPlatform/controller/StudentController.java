@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.crossPlatform.dto.StudentRequestDTO;
-import com.example.crossPlatform.dto.StudentResponceDTO;
+import com.example.crossPlatform.dto.StudentResponseDTO;
 import com.example.crossPlatform.service.StudentService;
 
 import jakarta.validation.Valid;
@@ -33,12 +33,12 @@ public class StudentController {
     }
 
     @PostMapping("/students")
-    public ResponseEntity<StudentResponceDTO> addStudent(@RequestBody @Valid StudentRequestDTO student) {
+    public ResponseEntity<StudentResponseDTO> addStudent(@RequestBody @Valid StudentRequestDTO student) {
         return ResponseEntity.status(HttpStatus.CREATED).body(studentService.create(student));
     }
 
     @GetMapping("/students")
-    public List<StudentResponceDTO> getStudents(@RequestParam(required = false) String name) {
+    public List<StudentResponseDTO> getStudents(@RequestParam(required = false) String name) {
         if (name == null)
             return studentService.getAll();
         else
@@ -46,13 +46,13 @@ public class StudentController {
     }
 
     @GetMapping("/students/{id}")
-    public ResponseEntity<StudentResponceDTO> getStudent(@PathVariable Long id) {
+    public ResponseEntity<StudentResponseDTO> getStudent(@PathVariable Long id) {
         return ResponseEntity.ok().body(studentService.getById(id));
     }
 
     @PatchMapping("/students/{id}")
     public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody StudentRequestDTO student) {
-        StudentResponceDTO updated = studentService.update(id, student);
+        StudentResponseDTO updated = studentService.update(id, student);
         if (updated != null) {
             return ResponseEntity.ok(updated);
         } else {
