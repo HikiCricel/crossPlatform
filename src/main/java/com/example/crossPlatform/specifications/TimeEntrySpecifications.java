@@ -5,16 +5,15 @@ import java.time.LocalDateTime;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.example.crossPlatform.enums.TaskType;
-import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.model.TimeEntry;
 
 public class TimeEntrySpecifications {
-    private static Specification<TimeEntry> studentLike(Student student) {
+    private static Specification<TimeEntry> studentIdLike(Long studentId) {
         return (root, query, criteriaBuilder) -> {
-            if (student == null) {
+            if (studentId == null) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("student"), student);
+            return criteriaBuilder.equal(root.get("studentId"), studentId);
         };
     }
 
@@ -51,13 +50,10 @@ public class TimeEntrySpecifications {
         };
     }
 
-    public static Specification<TimeEntry> filter(TaskType type, Student student,
-    LocalDateTime dateTimeStart, LocalDateTime dateTimeEnd, boolean expression){
+    public static Specification<TimeEntry> filter(TaskType type, Long studentId, boolean expression){
         return Specification.allOf(
             typeLike(type),
-            studentLike(student),
-            timeDateStartLike(dateTimeStart),
-            timeDateEndLike(dateTimeEnd),
+            studentIdLike(studentId),
             isBillableLike(expression)
         );
     }

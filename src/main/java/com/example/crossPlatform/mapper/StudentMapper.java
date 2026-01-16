@@ -14,6 +14,6 @@ public class StudentMapper {
 
     public static StudentResponseDTO studentToStudentResponseDTO(Student student) {
         return new StudentResponseDTO(student.getId(), student.getName(), student.getGroup(),
-                student.getRecentEntries(), student.getDeadlines());
+                TimeEntryMapper.timeEntryToTimeEntryResponseDTOList(student.getRecentEntries()), student.getDeadlines());
     }
 }
