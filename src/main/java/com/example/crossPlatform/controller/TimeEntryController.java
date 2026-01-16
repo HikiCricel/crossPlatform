@@ -1,6 +1,6 @@
 package com.example.crossPlatform.controller;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.crossPlatform.dto.TimeEntryRequestDTO;
 import com.example.crossPlatform.dto.TimeEntryResponseDTO;
 import com.example.crossPlatform.enums.TaskType;
-import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.service.TimeEntryService;
 
 import jakarta.validation.Valid;
@@ -34,7 +33,7 @@ public class TimeEntryController {
     }
 
     @PostMapping("/timeEntries")
-    public ResponseEntity<TimeEntryResponseDTO> addTimEntity(@RequestBody @Valid TimeEntryRequestDTO timeEntry) {
+    public ResponseEntity<TimeEntryResponseDTO> addTimEntry(@RequestBody @Valid TimeEntryRequestDTO timeEntry) {
         return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryService.create(timeEntry));
     }
 
@@ -43,8 +42,14 @@ public class TimeEntryController {
         return ResponseEntity.ok().body(timeEntryService.getById(id));
     }
 
+    @GetMapping("/timeEntries")
+    public List<TimeEntryResponseDTO> getTimeEntriesByType(@RequestParam(required = false) TaskType timeEntry) {
+        if(timeEntry == null) return timeEntryService.getAll();
+        else return timeEntryService.getAllByType(timeEntry);
+    }
+    
     @PatchMapping("/timeEntries/{id}")
-    public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody TimeEntryRequestDTO timeEntry) {
+    public ResponseEntity<Object> editTimeEntry(@PathVariable Long id, @RequestBody TimeEntryRequestDTO timeEntry) {
         TimeEntryResponseDTO updated = timeEntryService.update(id, timeEntry);
         if (updated != null) {
             return ResponseEntity.ok(updated);
@@ -55,18 +60,16 @@ public class TimeEntryController {
 
     @GetMapping("/timeEntries/filter")
     public ResponseEntity<Object> getByFilter(
-            @RequestParam(required = false) Student student,
+            @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) TaskType type,
-            @RequestParam(required = false) LocalDateTime dateTimeStart,
-            @RequestParam(required = false) LocalDateTime dateTimeEnd,
             @RequestParam(required = false) boolean expression,
             @PageableDefault(page = 0, size = 10, sort = "title") Pageable pageable) {
         return ResponseEntity
-                .ok(timeEntryService.getByFilter(student, type, dateTimeStart, dateTimeEnd, expression, pageable));
+                .ok(timeEntryService.getByFilter(type, studentId, expression, pageable));
     }
 
     @DeleteMapping("/timeEntries/{id}")
-    public ResponseEntity<Void> deleteTimEntity(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTimEntry(@PathVariable Long id) {
         if (timeEntryService.deleteById(id)) {
             ResponseEntity.noContent().build();
         }

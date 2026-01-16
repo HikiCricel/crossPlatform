@@ -1,6 +1,7 @@
 package com.example.crossPlatform.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,33 +23,42 @@ import com.example.crossPlatform.repository.TimeEntryRepository;
 import com.example.crossPlatform.specifications.TimeEntrySpecifications;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class TimeEntryService {
+    private List<TimeEntry> timeEntries = new ArrayList<>();
     private final TimeEntryRepository timeEntryRepository;
     private final StudentRepository studentRepository;
 
-    public TimeEntryService(TimeEntryRepository timeEntryRepository, StudentRepository studentRepository) {
-        this.timeEntryRepository = timeEntryRepository;
-        this.studentRepository = studentRepository;
-    }
-
     @Cacheable(value = "timeEntries", key = "#root.methodName")
-    public List<TimeEntry> getAll() {
-        return timeEntryRepository.findAll();
+    public List<TimeEntryResponseDTO> getAll() {
+        timeEntries = timeEntryRepository.findAll();
+        List<TimeEntryResponseDTO> timeEntriesResponse = new ArrayList<>();
+        for(TimeEntry timeEntry: timeEntries){
+            timeEntriesResponse.add(TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry));
+        }
+        return timeEntriesResponse;
     }
 
-    public List<TimeEntry> getAllByDescription(String description) {
-        return timeEntryRepository.findAllByDescription(description);
+    public List<TimeEntryResponseDTO> getAllByType(TaskType type) {
+        timeEntries = timeEntryRepository.findAllByType(type);
+        List<TimeEntryResponseDTO> timeEntriesResponse = new ArrayList<>();
+        for (TimeEntry timeEntry : timeEntries) {
+            timeEntriesResponse.add(TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry));
+        }
+        return timeEntriesResponse;
     }
 
-    public List<TimeEntry> getAllByType(TaskType type) {
-        return timeEntryRepository.findAllByType(type);
-    }
-
-    public List<TimeEntry> getAllByStudent(Student student) {
-        return timeEntryRepository.findAllByStudent(student);
+    public List<TimeEntryResponseDTO> getAllByStudent(Student student) {
+        timeEntries = timeEntryRepository.findAllByStudent(student);
+        List<TimeEntryResponseDTO> timeEntriesResponse = new ArrayList<>();
+        for (TimeEntry timeEntry : timeEntries) {
+            timeEntriesResponse.add(TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry));
+        }
+        return timeEntriesResponse;
     }
 
     @Transactional
@@ -83,8 +93,8 @@ public class TimeEntryService {
             @CacheEvict(value = "timeEntry", key = "#id") })
     public TimeEntryResponseDTO update(Long id, TimeEntryRequestDTO request) {
         TimeEntry timeEntry = timeEntryRepository.findById(id).map(existingTimeEntry -> {
-            // existingTimeEntry.setTimeStart(request.getTimeStart());
-            // existingTimeEntry.setTimeEnd(request.getTimeEnd());
+            existingTimeEntry.setType(request.type());
+            existingTimeEntry.setSubject(request.subject());
             return timeEntryRepository.save(existingTimeEntry);
         }).orElse(null);
         return TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry);
@@ -101,10 +111,9 @@ public class TimeEntryService {
         return false;
     }
 
-    public Page<TimeEntry> getByFilter(Student student, TaskType type, LocalDateTime dateTimeStart,
-            LocalDateTime dateTimeEnd, boolean expression, Pageable pageable) {
+    public Page<TimeEntry> getByFilter(TaskType type, Long studentId, boolean expression, Pageable pageable) {
         return timeEntryRepository.findAll(
-                TimeEntrySpecifications.filter(type, student, dateTimeStart, dateTimeEnd, expression), pageable);
+                TimeEntrySpecifications.filter(type, studentId, expression), pageable);
     }
 
 }
