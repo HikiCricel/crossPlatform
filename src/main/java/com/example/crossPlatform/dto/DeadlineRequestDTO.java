@@ -1,7 +1,9 @@
 package com.example.crossPlatform.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
-public record DeadlineRequestDTO(String subject, LocalDateTime deadline) {
+import com.example.crossPlatform.enums.TaskType;
+
+public record DeadlineRequestDTO(String subject, LocalDate deadline, TaskType type) {
 
 }

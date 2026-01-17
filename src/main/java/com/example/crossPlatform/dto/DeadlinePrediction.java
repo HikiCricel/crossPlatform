@@ -1,6 +1,6 @@
 package com.example.crossPlatform.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import com.example.crossPlatform.enums.RiskLevel;
 
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class DeadlinePrediction {
     private String subject;
-    private LocalDateTime deadline;
+    private LocalDate deadline;
     private Double hoursLeft;
     private RiskLevel risk;
 }
