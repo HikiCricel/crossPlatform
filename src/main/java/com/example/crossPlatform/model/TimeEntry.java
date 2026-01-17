@@ -6,6 +6,9 @@ import com.example.crossPlatform.enums.TaskType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,11 +29,10 @@ public class TimeEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private Student student;
-    @Size(min = 3, max = 500, message = "tasktype")
-    @Column(nullable = false, length = 100)
+    @Enumerated(EnumType.STRING)
     private TaskType type;
     @Size(min = 2, max = 100, message = "subject")
     @Column(nullable = false, length = 100)
@@ -40,9 +42,9 @@ public class TimeEntry {
     private String description;
     @Column(nullable = false, length = 100)
     private LocalDateTime timeStart;
-    @Column(nullable = true, length = 100)
+    @Column(length = 100)
     private LocalDateTime timeEnd;
-    @Column(nullable = true, length = 100)
+    @Column(length = 10)
     private Double duration;
     @Column()
     private boolean isBillable; // учёт времени

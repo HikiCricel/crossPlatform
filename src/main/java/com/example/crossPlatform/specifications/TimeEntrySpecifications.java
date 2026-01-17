@@ -1,7 +1,5 @@
 package com.example.crossPlatform.specifications;
 
-import java.time.LocalDateTime;
-
 import org.springframework.data.jpa.domain.Specification;
 
 import com.example.crossPlatform.enums.TaskType;
@@ -26,35 +24,16 @@ public class TimeEntrySpecifications {
         };
     }
 
-    private static Specification<TimeEntry> timeDateStartLike(LocalDateTime timeStart) {
+    private static Specification<TimeEntry> isBillableLike(boolean expr) {
         return (root, query, criteriaBuilder) -> {
-            if (timeStart == null) {
-                return null;
-            }
-            return criteriaBuilder.equal(root.get("type"), timeStart);
-        };
-    }
-
-    private static Specification<TimeEntry> timeDateEndLike(LocalDateTime timeEnd) {
-        return (root, query, criteriaBuilder) -> {
-            if (timeEnd == null) {
-                return null;
-            }
-            return criteriaBuilder.equal(root.get("type"), timeEnd);
-        };
-    }
-
-    private static Specification<TimeEntry> isBillableLike(boolean expr){
-        return (root, query, criteriaBuilder) ->{
             return criteriaBuilder.equal(root.get("isBillable"), expr);
         };
     }
 
-    public static Specification<TimeEntry> filter(TaskType type, Long studentId, boolean expression){
+    public static Specification<TimeEntry> filter(TaskType type, Long studentId, boolean expression) {
         return Specification.allOf(
-            typeLike(type),
-            studentIdLike(studentId),
-            isBillableLike(expression)
-        );
+                typeLike(type),
+                studentIdLike(studentId),
+                isBillableLike(expression));
     }
 }
