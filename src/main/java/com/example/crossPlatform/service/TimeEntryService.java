@@ -1,5 +1,6 @@
 package com.example.crossPlatform.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class TimeEntryService {
     public List<TimeEntryResponseDTO> getAll() {
         timeEntries = timeEntryRepository.findAll();
         List<TimeEntryResponseDTO> timeEntriesResponse = new ArrayList<>();
-        for(TimeEntry timeEntry: timeEntries){
+        for (TimeEntry timeEntry : timeEntries) {
             timeEntriesResponse.add(TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry));
         }
         return timeEntriesResponse;
@@ -52,8 +53,8 @@ public class TimeEntryService {
         return timeEntriesResponse;
     }
 
-    public List<TimeEntryResponseDTO> getAllByStudent(Student student) {
-        timeEntries = timeEntryRepository.findAllByStudent(student);
+    public List<TimeEntryResponseDTO> getAllByStudentId(Long id) {
+        timeEntries = timeEntryRepository.findAllByStudentId(id);
         List<TimeEntryResponseDTO> timeEntriesResponse = new ArrayList<>();
         for (TimeEntry timeEntry : timeEntries) {
             timeEntriesResponse.add(TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry));
@@ -78,8 +79,6 @@ public class TimeEntryService {
 
         TimeEntry saved = timeEntryRepository.save(timeEntry);
         return TimeEntryMapper.timeEntryToTimeEntryResponseDTO(saved);
-        // TimeEntry timeEntry = timeEntryRepository.save(TimeEntryMapper.timeEntryRequestToTimeEntry(request));
-        // return TimeEntryMapper.timeEntryToTimeEntryResponceDTO(timeEntry);
     }
 
     @Cacheable(value = "timeEntry", key = "#id")
@@ -116,4 +115,17 @@ public class TimeEntryService {
                 TimeEntrySpecifications.filter(type, studentId, expression), pageable);
     }
 
+    @Transactional
+    @CacheEvict(value = "timeEntry", allEntries = true)
+    public TimeEntryResponseDTO setTimeEnd(Long id) {
+        TimeEntry timeEntry = timeEntryRepository.findById(id).map(existingTimeEntry -> {
+            existingTimeEntry.setTimeEnd(LocalDateTime.now());
+            LocalDateTime startTime = existingTimeEntry.getTimeStart();
+            LocalDateTime endTime = existingTimeEntry.getTimeEnd();
+            Duration duration = Duration.between(startTime, endTime);
+            existingTimeEntry.setDuration((double) duration.toMinutes() / 60);
+            return timeEntryRepository.save(existingTimeEntry);
+        }).orElse(null);
+        return TimeEntryMapper.timeEntryToTimeEntryResponseDTO(timeEntry);
+    }
 }
