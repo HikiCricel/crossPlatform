@@ -15,29 +15,32 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.crossPlatform.dto.DeadlinePrediction;
+import com.example.crossPlatform.dto.DeadlineResponseDTO;
 import com.example.crossPlatform.dto.StudentRequestDTO;
 import com.example.crossPlatform.dto.StudentResponseDTO;
+import com.example.crossPlatform.service.DeadlineService;
 import com.example.crossPlatform.service.StudentService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/students")
+@RequiredArgsConstructor
 public class StudentController {
 
     private final StudentService studentService;
+    private final DeadlineService deadlineService;
 
-    public StudentController(StudentService studentService) {
-        this.studentService = studentService;
-    }
-
-    @PostMapping("/students")
+    @PostMapping
     public ResponseEntity<StudentResponseDTO> addStudent(@RequestBody @Valid StudentRequestDTO student) {
         return ResponseEntity.status(HttpStatus.CREATED).body(studentService.create(student));
     }
 
-    @GetMapping("/students")
+    @GetMapping
     public List<StudentResponseDTO> getStudents(@RequestParam(required = false) String name) {
         if (name == null)
             return studentService.getAll();
@@ -45,12 +48,12 @@ public class StudentController {
             return studentService.getAllByGroup(name);
     }
 
-    @GetMapping("/students/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<StudentResponseDTO> getStudent(@PathVariable Long id) {
         return ResponseEntity.ok().body(studentService.getById(id));
     }
 
-    @PatchMapping("/students/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody StudentRequestDTO student) {
         StudentResponseDTO updated = studentService.update(id, student);
         if (updated != null) {
@@ -60,7 +63,7 @@ public class StudentController {
         }
     }
 
-    @DeleteMapping("/students/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         if (studentService.deleteById(id)) {
             ResponseEntity.noContent().build();
@@ -68,11 +71,33 @@ public class StudentController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/students/filter")
+    @GetMapping("/filter")
     public ResponseEntity<Object> getByFilter(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String title,
             @PageableDefault(page = 0, size = 10, sort = "title") Pageable pageable) {
         return ResponseEntity.ok(studentService.getByFilter(name, title, pageable));
+    }
+
+    @PatchMapping("/{studentId}/deadlines")
+    public ResponseEntity<Object> addDeadlineToStudent(@PathVariable Long studentId, @RequestParam Long deadlineId) {
+        DeadlineResponseDTO updated = deadlineService.addDeadlineToStudent(studentId, deadlineId);
+        if (updated != null)
+            return ResponseEntity.ok(updated);
+        return ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/{studentId}/deadlines/delete")
+    public ResponseEntity<Object> removeDeadlineFromStudent(@PathVariable Long studentId,
+            @RequestParam Long deadlineId) {
+        DeadlineResponseDTO updated = deadlineService.removeDeadlineFromStudent(studentId, deadlineId);
+        if (updated != null)
+            return ResponseEntity.ok(updated);
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{studentId}/predictions")
+    public List<DeadlinePrediction> getPredictions(@PathVariable Long studentId) {
+        return deadlineService.getDeadlinePredictionsForStudent(studentId);
     }
 }

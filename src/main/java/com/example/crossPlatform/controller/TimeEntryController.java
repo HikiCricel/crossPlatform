@@ -24,7 +24,7 @@ import com.example.crossPlatform.service.TimeEntryService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/timeEntries")
 public class TimeEntryController {
     private final TimeEntryService timeEntryService;
 
@@ -32,23 +32,25 @@ public class TimeEntryController {
         this.timeEntryService = timeEntryService;
     }
 
-    @PostMapping("/timeEntries")
+    @PostMapping
     public ResponseEntity<TimeEntryResponseDTO> addTimEntry(@RequestBody @Valid TimeEntryRequestDTO timeEntry) {
         return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryService.create(timeEntry));
     }
 
-    @GetMapping("/timeEntries/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<TimeEntryResponseDTO> getTimeEntry(@PathVariable Long id) {
         return ResponseEntity.ok().body(timeEntryService.getById(id));
     }
 
-    @GetMapping("/timeEntries")
+    @GetMapping
     public List<TimeEntryResponseDTO> getTimeEntriesByType(@RequestParam(required = false) TaskType timeEntry) {
-        if(timeEntry == null) return timeEntryService.getAll();
-        else return timeEntryService.getAllByType(timeEntry);
+        if (timeEntry == null)
+            return timeEntryService.getAll();
+        else
+            return timeEntryService.getAllByType(timeEntry);
     }
-    
-    @PatchMapping("/timeEntries/{id}")
+
+    @PatchMapping("/{id}")
     public ResponseEntity<Object> editTimeEntry(@PathVariable Long id, @RequestBody TimeEntryRequestDTO timeEntry) {
         TimeEntryResponseDTO updated = timeEntryService.update(id, timeEntry);
         if (updated != null) {
@@ -58,7 +60,7 @@ public class TimeEntryController {
         }
     }
 
-    @GetMapping("/timeEntries/filter")
+    @GetMapping("/filter")
     public ResponseEntity<Object> getByFilter(
             @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) TaskType type,
@@ -68,11 +70,20 @@ public class TimeEntryController {
                 .ok(timeEntryService.getByFilter(type, studentId, expression, pageable));
     }
 
-    @DeleteMapping("/timeEntries/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTimEntry(@PathVariable Long id) {
         if (timeEntryService.deleteById(id)) {
             ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/endTime")
+    public ResponseEntity<Object> setTimeEnd(@PathVariable long id) {
+        TimeEntryResponseDTO updated = timeEntryService.setTimeEnd(id);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        }
+        return ResponseEntity.notFound().build();
     }
 }

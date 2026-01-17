@@ -19,34 +19,41 @@ import com.example.crossPlatform.dto.DeadlineResponseDTO;
 import com.example.crossPlatform.service.DeadlineService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/deadlines")
+@RequiredArgsConstructor
 public class DeadlineController {
     private final DeadlineService deadlineService;
-    public DeadlineController(DeadlineService deadlineService){
-        this.deadlineService = deadlineService;
-    }
 
-    @PostMapping("/deadlines")
+    @PostMapping
     public ResponseEntity<DeadlineResponseDTO> addDeadline(@RequestBody @Valid DeadlineRequestDTO deadline) {
         return ResponseEntity.status(HttpStatus.CREATED).body(deadlineService.create(deadline));
     }
 
-    @GetMapping("/deadLines")
+    @GetMapping("/type")
     public List<DeadlineResponseDTO> getDeadlines(@RequestParam(required = false) String type) {
-        if(type == null) 
+        if (type == null)
             return deadlineService.getAll();
-        else 
+        else
             return deadlineService.getAllByType(type);
     }
 
-    @GetMapping("/deadLines/{id}")
+    @GetMapping("/studentId")
+    public List<DeadlineResponseDTO> getDeadlines(@RequestParam(required = false) Long id) {
+        if (id == null)
+            return deadlineService.getAll();
+        else
+            return deadlineService.getAllByStudentId(id);
+    }
+
+    @GetMapping("/{id}")
     public ResponseEntity<DeadlineResponseDTO> getDeadline(@PathVariable Long id) {
         return ResponseEntity.ok().body(deadlineService.getById(id));
     }
 
-    @PatchMapping("/deadlines/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody DeadlineRequestDTO deadline) {
         DeadlineResponseDTO updated = deadlineService.update(id, deadline);
         if (updated != null) {
@@ -56,9 +63,9 @@ public class DeadlineController {
         }
     }
 
-    @DeleteMapping("/deadlines/{id}")
-    public ResponseEntity<Void> deleteDeadline(@PathVariable Long id){
-        if(deadlineService.deleteById(id)){
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDeadline(@PathVariable Long id) {
+        if (deadlineService.deleteById(id)) {
             ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok().build();
