@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.model.Deadline;
 
 @Repository
 public interface DeadlineRepository extends JpaRepository<Deadline, Long>, JpaSpecificationExecutor<Deadline> {
-    List<Deadline> findAllByType(String type);
+    List<Deadline> findAllByType(TaskType type);
 
     @Query("SELECT d FROM Deadline d JOIN d.students s WHERE s.id = :studentId")
-    List<Deadline> findAllByStudentId(Long id);
+    List<Deadline> findAllByStudentId(Long studentId);
 }

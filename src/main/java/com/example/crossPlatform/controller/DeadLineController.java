@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.crossPlatform.dto.DeadlineRequestDTO;
 import com.example.crossPlatform.dto.DeadlineResponseDTO;
+import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.service.DeadlineService;
 
 import jakarta.validation.Valid;
@@ -33,7 +34,7 @@ public class DeadlineController {
     }
 
     @GetMapping("/type")
-    public List<DeadlineResponseDTO> getDeadlines(@RequestParam(required = false) String type) {
+    public List<DeadlineResponseDTO> getDeadlines(@RequestParam(required = false) TaskType type) {
         if (type == null)
             return deadlineService.getAll();
         else

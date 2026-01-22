@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.crossPlatform.dto.DeadlinePrediction;
 import com.example.crossPlatform.dto.DeadlineRequestDTO;
 import com.example.crossPlatform.dto.DeadlineResponseDTO;
+import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.mapper.DeadlineMapper;
 import com.example.crossPlatform.model.Deadline;
 import com.example.crossPlatform.model.Student;
@@ -42,7 +43,7 @@ public class DeadlineService {
         return deadlinesResponse;
     }
 
-    public List<DeadlineResponseDTO> getAllByType(String type) {
+    public List<DeadlineResponseDTO> getAllByType(TaskType type) {
         deadlines = deadlineRepository.findAllByType(type);
         List<DeadlineResponseDTO> deadlinesResponse = new ArrayList<>();
         for (Deadline deadline : deadlines) {
