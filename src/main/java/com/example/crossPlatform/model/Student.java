@@ -29,7 +29,7 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Size(min = 3, max = 50, message = "name")
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String name;
     @Size(min = 3, max = 50, message = "group")
     @Column(nullable = false, length = 100, name = "group_name")
