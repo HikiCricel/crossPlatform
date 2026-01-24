@@ -60,15 +60,15 @@ public class DeadlineService {
     //     return deadlinesResponse;
     // }
 
-    // public List<DeadlineResponseDTO> getAllByStudentId(Long id) {
-    //     deadlines = deadlineRepository.findAllByStudentId(id);
-    //     List<DeadlineResponseDTO> deadlinesResponse = new ArrayList<>();
-    //     for (Deadline deadline : deadlines) {
-    //         deadlinesResponse.add(DeadlineMapper.deadlineToDeadlineResponseDTO(deadline));
-    //     }
-    //     logger.info("Successfully retrieved all Deadlines by studentId. Total count: {}", deadlinesResponse.size());
-    //     return deadlinesResponse;
-    // }
+    public List<DeadlineResponseDTO> getAllByStudentId(Long id) {
+        deadlines = deadlineRepository.findAllByStudentId(id);
+        List<DeadlineResponseDTO> deadlinesResponse = new ArrayList<>();
+        for (Deadline deadline : deadlines) {
+            deadlinesResponse.add(DeadlineMapper.deadlineToDeadlineResponseDTO(deadline));
+        }
+        logger.info("Successfully retrieved all Deadlines by studentId. Total count: {}", deadlinesResponse.size());
+        return deadlinesResponse;
+    }
 
     @CacheEvict(value = "deadline", allEntries = true)
     @Transactional

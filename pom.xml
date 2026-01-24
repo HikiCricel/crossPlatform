@@ -108,7 +108,13 @@
 			<artifactId>telegrambots</artifactId>
 			<version>6.9.7.1</version>
 			<scope>compile</scope>
-		</dependency>	
+		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/org.jxls/jxls-poi -->
+		<dependency>
+			<groupId>org.jxls</groupId>
+			<artifactId>jxls-poi</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

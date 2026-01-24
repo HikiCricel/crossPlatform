@@ -2,8 +2,10 @@ package com.example.crossPlatform.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +22,7 @@ import com.example.crossPlatform.dto.DeadlineRequestDTO;
 import com.example.crossPlatform.dto.DeadlineResponseDTO;
 import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.service.DeadlineService;
+import com.example.crossPlatform.service.ReportService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DeadlineController {
     private final DeadlineService deadlineService;
+    private final ReportService reportService;
     private static final Logger logger = LoggerFactory.getLogger(DeadlineController.class);
 
     @PostMapping
@@ -93,6 +97,17 @@ public class DeadlineController {
             logger.error("Error while getting Deadline with id: {}. Error: {}", id, e.getMessage(), e);
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping(value = "/getReport")
+    public ResponseEntity<Resource> downloadDeadlinesForStudent(
+            @RequestParam(required = true) Long studentId) {
+        Resource resource = reportService.getStudentDeadlineReport(studentId);
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType
+                        .parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=deadlines_report.xlsx")
+                .body(resource);
     }
 
     @PatchMapping("/{id}")

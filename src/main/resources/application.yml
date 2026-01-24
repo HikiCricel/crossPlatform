@@ -65,3 +65,6 @@ telegram:
         name: ${chnm}
         token: ${tkn}
         chat-id: ${chat-id}
+---
+report:
+    template-location: classpath:templates/report-template.xlsx
