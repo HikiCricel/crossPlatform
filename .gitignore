@@ -34,3 +34,7 @@ build/
 
 ### Password ###
 .env
+
+### Logs & Files ###
+logs/
+uploads/*

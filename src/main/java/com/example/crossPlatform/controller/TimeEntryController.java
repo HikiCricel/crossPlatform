@@ -1,7 +1,7 @@
 package com.example.crossPlatform.controller;
 
-import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -22,40 +22,67 @@ import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.service.TimeEntryService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/timeEntries")
+@RequiredArgsConstructor
 public class TimeEntryController {
     private final TimeEntryService timeEntryService;
-
-    public TimeEntryController(TimeEntryService timeEntryService) {
-        this.timeEntryService = timeEntryService;
-    }
+    private static final Logger logger = LoggerFactory.getLogger(TimeEntryController.class);
 
     @PostMapping
     public ResponseEntity<TimeEntryResponseDTO> addTimEntry(@RequestBody @Valid TimeEntryRequestDTO timeEntry) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryService.create(timeEntry));
+        logger.info("Received request to add TimEntry");
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(timeEntryService.create(timeEntry));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid add TimEntry request: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            logger.error("Error while adding new TimEntry: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TimeEntryResponseDTO> getTimeEntry(@PathVariable Long id) {
-        return ResponseEntity.ok().body(timeEntryService.getById(id));
+        logger.info("Received request to get TimeEntry with id: {}", id);
+        try {
+            return ResponseEntity.ok().body(timeEntryService.getById(id));
+        } catch (IllegalArgumentException e) {
+            logger.warn("Id value is invalid: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("Error while getting TimeEntry with id: {}. Error: {}", id, e.getMessage(), e);
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @GetMapping
-    public List<TimeEntryResponseDTO> getTimeEntriesByType(@RequestParam(required = false) TaskType timeEntry) {
-        if (timeEntry == null)
-            return timeEntryService.getAll();
-        else
-            return timeEntryService.getAllByType(timeEntry);
-    }
+    // @GetMapping
+    // public List<TimeEntryResponseDTO> getTimeEntriesByType(@RequestParam(required
+    // = false) TaskType timeEntry) {
+    // if (timeEntry == null)
+    // return timeEntryService.getAll();
+    // else
+    // return timeEntryService.getAllByType(timeEntry);
+    // }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> editTimeEntry(@PathVariable Long id, @RequestBody TimeEntryRequestDTO timeEntry) {
-        TimeEntryResponseDTO updated = timeEntryService.update(id, timeEntry);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        } else {
+        logger.info("Received request to edit TimeEntry: {}", id);
+        try {
+            TimeEntryResponseDTO updated = timeEntryService.update(id, timeEntry);
+            if (updated != null) {
+                return ResponseEntity.ok(updated);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalArgumentException e) {
+            logger.warn("Id value is invalid: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("Error while updating TimeEntry: {}. Error: {}", id, e.getMessage(), e);
             return ResponseEntity.notFound().build();
         }
     }
@@ -66,24 +93,44 @@ public class TimeEntryController {
             @RequestParam(required = false) TaskType type,
             @RequestParam(required = false) boolean expression,
             @PageableDefault(page = 0, size = 10, sort = "title") Pageable pageable) {
-        return ResponseEntity
-                .ok(timeEntryService.getByFilter(type, studentId, expression, pageable));
+        logger.info("Received request to get TimeEntries with filter");
+        try {
+            return ResponseEntity.ok(timeEntryService.getByFilter(type, studentId, expression, pageable));
+        } catch (Exception e) {
+            logger.error("Error while getting filtered TimeEntries. Error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTimEntry(@PathVariable Long id) {
-        if (timeEntryService.deleteById(id)) {
-            ResponseEntity.noContent().build();
+        logger.info("Received request to delete TimeEntry with id: {}", id);
+
+        try {
+            if (timeEntryService.deleteById(id)) {
+                return ResponseEntity.noContent().build();
+            }
+
+            logger.warn("Can't delete TimeEntry with id: {}", id);
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("Error while deleting TimeEntry with id: {}. Error: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}/endTime")
     public ResponseEntity<Object> setTimeEnd(@PathVariable long id) {
-        TimeEntryResponseDTO updated = timeEntryService.setTimeEnd(id);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
+        logger.info("Received request to set end time for TimeEntry");
+        try {
+            TimeEntryResponseDTO updated = timeEntryService.setTimeEnd(id);
+            if (updated != null) {
+                return ResponseEntity.ok(updated);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("Error while setting end time for TimeEntry. Error: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-        return ResponseEntity.notFound().build();
     }
 }
