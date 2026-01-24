@@ -37,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthenticationService {
     public final UserRepository userRepository;
+    private final BotService botService;
     public final TokenRepository tokenRepository;
     public final JwtTokenProvider jwtTokenProvider;
     public final CookieUtil cookieUtil;
@@ -110,6 +111,13 @@ public class AuthenticationService {
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
         logger.info("Login completed successfully for user: {}", user.getUsername());
+
+        try {
+            botService.sendToAdmin("User " + user.getUsername() + " seccessfully logged in");
+        } catch (Exception e) {
+            logger.error("Failed to send login notification to admin");
+        }
+
         LoginResponse loginResponse = new LoginResponse(true, user.getRole().getName());
         return ResponseEntity.ok().headers(headers).body(loginResponse);
     }

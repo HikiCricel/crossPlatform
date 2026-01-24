@@ -31,7 +31,7 @@ spring:
             ddl-auto: update
 ---
 jwt:
-    secret: 66f65f5f97904ad05148f5a25c3f24adabf0d0f9b7c5ad09344393a55b8deeef
+    secret: ${scrt}
     access:
         duration:
             minutes: 5
@@ -59,3 +59,9 @@ spring:
             max-file-size: 10MB
             max-request-size: 10MB
             enabled: true
+---
+telegram:
+    bot:
+        name: ${chnm}
+        token: ${tkn}
+        chat-id: ${chat-id}
