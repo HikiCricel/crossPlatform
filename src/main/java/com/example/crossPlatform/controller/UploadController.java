@@ -17,7 +17,7 @@ import com.example.crossPlatform.service.UploadService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/upload")
+@RequestMapping("/api/upload")
 @RequiredArgsConstructor
 public class UploadController {
     private static final Logger logger = LoggerFactory.getLogger(UploadController.class);
@@ -45,7 +45,7 @@ public class UploadController {
         }
     }
 
-    @PostMapping(value = "/students", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/deadlines", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UploadResponseDTO> uploadDeadlines(@RequestParam MultipartFile file) {
         logger.info("Received request to upload file with Deadlines: {}", file.getOriginalFilename());
 

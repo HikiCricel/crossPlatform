@@ -57,5 +57,5 @@ spring:
         multipart:
             location: uploads/
             max-file-size: 10MB
-            max-requset-size: 10MBenabled
+            max-request-size: 10MB
             enabled: true

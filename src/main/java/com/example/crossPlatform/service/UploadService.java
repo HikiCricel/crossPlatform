@@ -2,13 +2,9 @@ package com.example.crossPlatform.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +32,7 @@ public class UploadService {
     private final StudentService studentService;
     private final DeadlineService deadlineService;
 
-    @Value("${spring.servlet.multipart.loaction}")
+    @Value("${spring.servlet.multipart.location}")
     private String uploadLocation;
 
     private void validateFile(MultipartFile file) {
@@ -50,21 +46,6 @@ public class UploadService {
         }
 
         logger.info("File validation passed: {}", filename);
-    }
-
-    private Path saveFile(MultipartFile file) throws IOException {
-        logger.debug("Attempting to save file: {}", file.getOriginalFilename());
-
-        String timestamp = LocalDateTime.now().toString().replaceAll(":", "-");
-        String filename = timestamp + "_" + file.getOriginalFilename();
-
-        Path targetLocation = Paths.get(uploadLocation).toAbsolutePath().normalize().resolve(filename);
-        logger.debug("File copying target location is setted up");
-
-        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-        logger.info("File saved to: {}", targetLocation);
-
-        return targetLocation;
     }
 
     public UploadResponseDTO importStudents(MultipartFile file) {
@@ -81,12 +62,11 @@ public class UploadService {
                 throw new IllegalArgumentException("File validation failed");
             }
 
-            Path savedFile = saveFile(file);
-
             CSVFormat format = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true)
                     .setIgnoreHeaderCase(true).setTrim(true).get();
 
-            try (BufferedReader reader = Files.newBufferedReader(savedFile, StandardCharsets.UTF_8);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
                     CSVParser csvParser = format.parse(reader)) {
                 for (CSVRecord record : csvParser) {
                     try {
@@ -120,12 +100,12 @@ public class UploadService {
                 throw new IllegalArgumentException("File validation failed");
             }
 
-            Path savedFile = saveFile(file);
-
             CSVFormat format = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true)
                     .setIgnoreHeaderCase(true).setTrim(true).get();
 
-            try (BufferedReader reader = Files.newBufferedReader(savedFile, StandardCharsets.UTF_8);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+
                     CSVParser csvParser = format.parse(reader)) {
                 for (CSVRecord record : csvParser) {
                     try {
