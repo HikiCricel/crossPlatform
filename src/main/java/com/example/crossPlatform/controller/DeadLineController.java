@@ -1,10 +1,11 @@
 package com.example.crossPlatform.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,19 +25,25 @@ import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.service.DeadlineService;
 import com.example.crossPlatform.service.ReportService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/deadlines")
 @RequiredArgsConstructor
+@Tag(name = "Deadlines", description = "Methods for managing deadlines")
 public class DeadlineController {
     private final DeadlineService deadlineService;
     private final ReportService reportService;
     private static final Logger logger = LoggerFactory.getLogger(DeadlineController.class);
 
+    @Operation(summary = "Create New Deadline", description = "Creates a new deadline in the system")
     @PostMapping
-    public ResponseEntity<DeadlineResponseDTO> addDeadline(@RequestBody @Valid DeadlineRequestDTO deadline) {
+    public ResponseEntity<DeadlineResponseDTO> addDeadline(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Deadline data to create", required = true) @RequestBody @Valid DeadlineRequestDTO deadline) {
         logger.info("Received request to add Deadline");
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(deadlineService.create(deadline));
@@ -49,44 +56,42 @@ public class DeadlineController {
         }
     }
 
-    // @GetMapping("/type")
-    // public List<DeadlineResponseDTO> getDeadlines(@RequestParam(required = false)
-    // TaskType type) {
-    // logger.info("Received request to get Deadlines with Tasktype: {}", type);
-    // try{
-    // if (type == null)
-    // return deadlineService.getAll();
-    // else
-    // return deadlineService.getAllByType(type);
-    // }
-    // catch(IllegalArgumentException e){
-    // logger.warn("Tasktype value is invalid: {}", type);
-    // return ResponseEntity.notFound().build();
-    // }
-    // catch(Exception e){
-    // logger.error("Error while getting Deadlines: {}", e.getMessage(), e);
-    // return new ArrayList<>();
-    // }
-    // }
+    @Operation(summary = "Get All Deadlines", description = "Retrieves a list of all deadlines in the system by type if it's not null, else retrieves a list of all dealines")
+    @GetMapping("/type")
+    public List<DeadlineResponseDTO> getDeadlinesByType(
+            @Parameter(description = "Task type to retrieve deadline", required = true) @RequestParam(required = false) TaskType type) {
+        logger.info("Received request to get Deadlines with Tasktype: {}", type);
+        try {
+            if (type == null)
+                return deadlineService.getAll();
+            else
+                return deadlineService.getAllByType(type);
+        } catch (Exception e) {
+            logger.error("Error while getting Deadlines: {}", e.getMessage(), e);
+            return new ArrayList<>();
+        }
+    }
 
-    // @GetMapping("/studentId")
-    // public List<DeadlineResponseDTO> getDeadlines(@RequestParam(required = false)
-    // Long id) {
-    // logger.info("Received request to get Deadlines with ID: {}", id);
-    // try{
-    // if (id == null)
-    // return deadlineService.getAll();
-    // else
-    // return deadlineService.getAllByStudentId(id);
-    // }
-    // catch(Exception e){
-    // logger.error("Error while getting Deadlines: {}", e.getMessage(), e);
-    // return new ArrayList<>();
-    // }
-    // }
+    @Operation(summary = "Get Deadline by studentID", description = "Retrieves a specific deadline by studentId that applied to it")
+    @GetMapping("/studentId")
+    public List<DeadlineResponseDTO> getDeadlinesByID(
+            @Parameter(description = "ID of the student to retrieve deadline", required = true) @RequestParam(required = false) Long id) {
+        logger.info("Received request to get Deadlines with ID: {}", id);
+        try {
+            if (id == null)
+                return deadlineService.getAll();
+            else
+                return deadlineService.getAllByStudentId(id);
+        } catch (Exception e) {
+            logger.error("Error while getting Deadlines: {}", e.getMessage(), e);
+            return new ArrayList<>();
+        }
+    }
 
+    @Operation(summary = "Get Deadline by ID", description = "Retrieves a specific deadline by its unique Id")
     @GetMapping("/{id}")
-    public ResponseEntity<DeadlineResponseDTO> getDeadline(@PathVariable Long id) {
+    public ResponseEntity<DeadlineResponseDTO> getDeadline(
+            @Parameter(description = "ID of the deadline to retrieve", required = true) @PathVariable Long id) {
         logger.info("Received request to get Deadline with id: {}", id);
         try {
             return ResponseEntity.ok().body(deadlineService.getById(id));
@@ -99,9 +104,10 @@ public class DeadlineController {
         }
     }
 
+    @Operation(summary = "Get Deadline Report", description = "Creates a report with all deadlines for a certain student")
     @GetMapping(value = "/getReport")
     public ResponseEntity<Resource> downloadDeadlinesForStudent(
-            @RequestParam(required = true) Long studentId) {
+            @Parameter(description = "ID of the student to create a report", required = true) @RequestParam(required = true) Long studentId) {
         Resource resource = reportService.getStudentDeadlineReport(studentId);
         return ResponseEntity.ok()
                 .contentType(org.springframework.http.MediaType
@@ -110,8 +116,11 @@ public class DeadlineController {
                 .body(resource);
     }
 
+    @Operation(summary = "Update Deadline", description = "Updates an existing deadline")
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody DeadlineRequestDTO deadline) {
+    public ResponseEntity<Object> editStudent(
+            @Parameter(description = "ID of the deadline to update", required = true) @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated deadline data", required = true) @RequestBody DeadlineRequestDTO deadline) {
         logger.info("Received request to edit Student with deadline: {}", id);
         try {
             DeadlineResponseDTO updated = deadlineService.update(id, deadline);
@@ -129,8 +138,10 @@ public class DeadlineController {
         }
     }
 
+    @Operation(summary = "Delete Deadline", description = "Deletes a dealine from the system")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDeadline(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDeadline(
+            @Parameter(description = "ID of the deadline to delete", required = true) @PathVariable Long id) {
         logger.info("Received request to delete Deadline with id: {}", id);
 
         try {
@@ -142,18 +153,6 @@ public class DeadlineController {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             logger.error("Error while deleting Deadline with id: {}. Error: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-    public ResponseEntity<Object> getByFilter(@RequestParam(required = false) TaskType type,
-            @RequestParam(required = false) Long id,
-            @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
-        logger.info("Received request to get Deadlines with filter");
-        try {
-            return ResponseEntity.ok(deadlineService.getByFilter(type, id, pageable));
-        } catch (Exception e) {
-            logger.error("Error while getting filtered Deadlines. Error: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }

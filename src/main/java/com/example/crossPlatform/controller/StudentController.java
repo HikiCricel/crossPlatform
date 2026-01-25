@@ -27,20 +27,26 @@ import com.example.crossPlatform.dto.StudentResponseDTO;
 import com.example.crossPlatform.service.DeadlineService;
 import com.example.crossPlatform.service.StudentService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/students")
 @RequiredArgsConstructor
+@Tag(name = "Students", description = "Methods for managing students")
 public class StudentController {
 
     private final StudentService studentService;
     private final DeadlineService deadlineService;
     private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
 
+    @Operation(summary = "Create New Student", description = "Creates a new student in the system")
     @PostMapping
-    public ResponseEntity<StudentResponseDTO> addStudent(@RequestBody @Valid StudentRequestDTO student) {
+    public ResponseEntity<StudentResponseDTO> addStudent(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Student data to create", required = true) @RequestBody @Valid StudentRequestDTO student) {
         logger.info("Received request to add Student");
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(studentService.create(student));
@@ -53,8 +59,10 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Get All Students", description = "Retrieves a list of all students in the system by group if it's not null, else retrieves a list of all students")
     @GetMapping("/group")
-    public List<StudentResponseDTO> getStudents(@RequestParam(required = false) String group) {
+    public List<StudentResponseDTO> getStudents(
+            @Parameter(description = "Group of the student", required = true) @RequestParam(required = false) String group) {
         logger.info("Received request to get Students with group: {}", group);
         if (group == null)
             return studentService.getAll();
@@ -62,8 +70,10 @@ public class StudentController {
             return studentService.getAllByGroup(group);
     }
 
+    @Operation(summary = "Get Student by ID", description = "Retrieves a specific student by its unique Id")
     @GetMapping("/{id}")
-    public ResponseEntity<StudentResponseDTO> getStudent(@PathVariable Long id) {
+    public ResponseEntity<StudentResponseDTO> getStudent(
+            @Parameter(description = "ID of the student to retrieve", required = true) @PathVariable Long id) {
         logger.info("Received request to get Student with id: {}", id);
         try {
             return ResponseEntity.ok().body(studentService.getById(id));
@@ -76,8 +86,11 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Update Student", description = "Updates an existing student")
     @PatchMapping("/{id}")
-    public ResponseEntity<Object> editStudent(@PathVariable Long id, @RequestBody StudentRequestDTO student) {
+    public ResponseEntity<Object> editStudent(
+            @Parameter(description = "ID of the student to update", required = true) @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Updated student data", required = true) @RequestBody StudentRequestDTO student) {
         logger.info("Received request to edit Student: {}", id);
         try {
             StudentResponseDTO updated = studentService.update(id, student);
@@ -95,8 +108,10 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Delete Student", description = "Deletes a student from the system")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteStudent(
+            @Parameter(description = "ID of the student to delete", required = true) @PathVariable Long id) {
         logger.info("Received request to delete Student with id: {}", id);
         try {
             if (studentService.deleteById(id)) {
@@ -110,11 +125,12 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Filter Student", description = "Search and filter students")
     @GetMapping("/filter")
     public ResponseEntity<Object> getByFilter(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String group,
-            @RequestParam(defaultValue = "name") String sort) {
+            @Parameter(description = "Name of the student to filter by") @RequestParam(required = false) String name,
+            @Parameter(description = "Group of the student to filter by") @RequestParam(required = false) String group,
+            @Parameter(description = "The field by which the result is sorted, it can be name, group or id") @RequestParam(defaultValue = "name") String sort) {
         logger.info("Received request to get Students with filter");
         try {
             if (!List.of("name", "group", "id").contains(sort)) {
@@ -129,8 +145,11 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Apply deadline to student", description = "Applies a certain deadline to certain student")
     @PatchMapping("/{studentId}/deadlines")
-    public ResponseEntity<Object> addDeadlineToStudent(@PathVariable Long studentId, @RequestParam Long deadlineId) {
+    public ResponseEntity<Object> addDeadlineToStudent(
+            @Parameter(description = "ID of the student to apply deadline", required = true) @PathVariable Long studentId,
+            @Parameter(description = "ID of the deadline to aplly", required = true) @RequestParam Long deadlineId) {
         logger.info("Received request to add Deadline to Student");
         try {
             DeadlineResponseDTO updated = deadlineService.addDeadlineToStudent(studentId, deadlineId);
@@ -143,9 +162,11 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Detach deadline to student", description = "Detaches a certain deadline from certain student")
     @PatchMapping("/{studentId}/deadlines/delete")
-    public ResponseEntity<Object> removeDeadlineFromStudent(@PathVariable Long studentId,
-            @RequestParam Long deadlineId) {
+    public ResponseEntity<Object> removeDeadlineFromStudent(
+            @Parameter(description = "ID of the student from which the deadline is detached", required = true) @PathVariable Long studentId,
+            @Parameter(description = "ID of the deadline to detach", required = true) @RequestParam Long deadlineId) {
         logger.info("Received request to remove Deadline from Student");
         try {
             DeadlineResponseDTO updated = deadlineService.removeDeadlineFromStudent(studentId, deadlineId);
@@ -158,8 +179,10 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Get Deadline Predicitons", description = "Gets deadline predictions for certain student")
     @GetMapping("/{studentId}/predictions")
-    public List<DeadlinePrediction> getPredictions(@PathVariable Long studentId) {
+    public List<DeadlinePrediction> getPredictions(
+            @Parameter(description = "ID of the student for whom deadline are predicted", required = true) @PathVariable Long studentId) {
         logger.info("Received request to get predictions for Student: {}", studentId);
         try {
             return deadlineService.getDeadlinePredictionsForStudent(studentId);

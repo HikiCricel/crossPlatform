@@ -25,10 +25,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
     @Bean
-    static PasswordEncoder passwordEncoder(){
+    static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    private static final String[] ALLOWED_URLS = { "/swagger-ui/**", "v3/api-docs/**" };
+
+    private static final String[] ALLOWED_URLS = { "/swagger-ui/**", "v3/api-docs/**", "/swagger-ui" };
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 

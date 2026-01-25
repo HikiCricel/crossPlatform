@@ -18,15 +18,19 @@ import com.example.crossPlatform.dto.LoginResponse;
 import com.example.crossPlatform.dto.UserLogged;
 import com.example.crossPlatform.service.AuthenticationService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "Methods for user authentication and authorization")
 public class AuthenticationController {
     private final AuthenticationService authService;
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
+    @Operation(summary = "Login User", description = "Authenticates user credentials and returns JWT token")
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request,
             @CookieValue(name = "access-token", required = false) String access,
@@ -41,6 +45,7 @@ public class AuthenticationController {
         }
     }
 
+    @Operation(summary = "Refresh User tokens", description = "Checks User tokens and refreshes the if needed")
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(
             @CookieValue(name = "refresh-token", required = false) String refresh) {
@@ -54,6 +59,7 @@ public class AuthenticationController {
         }
     }
 
+    @Operation(summary = "Logout User", description = "Revokes User tokens and logs him out")
     @PostMapping("/logout")
     public ResponseEntity<LoginResponse> logout(@CookieValue(name = "access-token", required = false) String access) {
         logger.info("Received request to logout user");
@@ -66,6 +72,7 @@ public class AuthenticationController {
         }
     }
 
+    @Operation(summary = "Get User info", description = "Shows info about authorized User")
     @GetMapping("/info")
     public ResponseEntity<UserLogged> info() {
         logger.info("Received request to show info about user");
@@ -78,6 +85,7 @@ public class AuthenticationController {
         }
     }
 
+    @Operation(summary = "Change User password", description = "Changes User password to new one and logs him out after it")
     @PatchMapping("/changePassword")
     public ResponseEntity<LoginResponse> changePassword(ChangePasswordRequest request) {
         logger.info("Received request to change password");

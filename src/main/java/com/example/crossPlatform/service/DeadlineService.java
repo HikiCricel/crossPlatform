@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +20,6 @@ import com.example.crossPlatform.model.Deadline;
 import com.example.crossPlatform.model.Student;
 import com.example.crossPlatform.repository.DeadlineRepository;
 import com.example.crossPlatform.repository.StudentRepository;
-import com.example.crossPlatform.specifications.DeadlineSpecifications;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -50,15 +47,15 @@ public class DeadlineService {
         return deadlinesResponse;
     }
 
-    // public List<DeadlineResponseDTO> getAllByType(TaskType type) {
-    //     deadlines = deadlineRepository.findAllByType(type);
-    //     List<DeadlineResponseDTO> deadlinesResponse = new ArrayList<>();
-    //     for (Deadline deadline : deadlines) {
-    //         deadlinesResponse.add(DeadlineMapper.deadlineToDeadlineResponseDTO(deadline));
-    //     }
-    //     logger.info("Successfully retrieved all Deadlines by type. Total count: {}", deadlinesResponse.size());
-    //     return deadlinesResponse;
-    // }
+    public List<DeadlineResponseDTO> getAllByType(TaskType type) {
+        deadlines = deadlineRepository.findAllByType(type);
+        List<DeadlineResponseDTO> deadlinesResponse = new ArrayList<>();
+        for (Deadline deadline : deadlines) {
+            deadlinesResponse.add(DeadlineMapper.deadlineToDeadlineResponseDTO(deadline));
+        }
+        logger.info("Successfully retrieved all Deadlines by type. Total count: {}", deadlinesResponse.size());
+        return deadlinesResponse;
+    }
 
     public List<DeadlineResponseDTO> getAllByStudentId(Long id) {
         deadlines = deadlineRepository.findAllByStudentId(id);
@@ -156,11 +153,5 @@ public class DeadlineService {
         logger.info("Predictions successfully identified for student ID: {}", studentId);
         return student.getDeadlines().stream()
                 .map(deadline -> deadlineMapper.deadlineToDeadlinePredictionDto(deadline, studentId)).toList();
-    }
-
-    public Page<Deadline> getByFilter(TaskType type, Long id, Pageable pageable) {
-        Page<Deadline> result = deadlineRepository.findAll(DeadlineSpecifications.filter(type, id), pageable);
-        logger.info("Successfully filtered Deadlines. Found {} results", result.getNumberOfElements());
-        return result;
     }
 }

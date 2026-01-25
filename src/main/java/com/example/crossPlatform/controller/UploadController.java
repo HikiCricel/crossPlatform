@@ -14,15 +14,19 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.crossPlatform.dto.UploadResponseDTO;
 import com.example.crossPlatform.service.UploadService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/upload")
 @RequiredArgsConstructor
+@Tag(name = "File Upload", description = "Methods for uploading .csv files to add info to database")
 public class UploadController {
     private static final Logger logger = LoggerFactory.getLogger(UploadController.class);
     private final UploadService uploadService;
 
+    @Operation(summary = "Upload new Student", description = "Receives file with new Students and adds to the database")
     @PostMapping(value = "/students", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UploadResponseDTO> uploadStudents(@RequestParam MultipartFile file) {
         logger.info("Received request to upload file with Students: {}", file.getOriginalFilename());
@@ -45,6 +49,7 @@ public class UploadController {
         }
     }
 
+    @Operation(summary = "Upload new Deadlines", description = "Receives file with new Deadlines and adds to the database")
     @PostMapping(value = "/deadlines", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UploadResponseDTO> uploadDeadlines(@RequestParam MultipartFile file) {
         logger.info("Received request to upload file with Deadlines: {}", file.getOriginalFilename());
