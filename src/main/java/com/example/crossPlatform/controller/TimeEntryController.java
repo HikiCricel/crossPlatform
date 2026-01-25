@@ -1,9 +1,12 @@
 package com.example.crossPlatform.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,14 +62,13 @@ public class TimeEntryController {
         }
     }
 
-    // @GetMapping
-    // public List<TimeEntryResponseDTO> getTimeEntriesByType(@RequestParam(required
-    // = false) TaskType timeEntry) {
-    // if (timeEntry == null)
-    // return timeEntryService.getAll();
-    // else
-    // return timeEntryService.getAllByType(timeEntry);
-    // }
+    @GetMapping("/studentId")
+    public List<TimeEntryResponseDTO> getTimeEntriesByStudentId(@RequestParam(required = false) Long studentId) {
+        if (studentId == null)
+            return timeEntryService.getAll();
+        else
+            return timeEntryService.getAllByStudentId(studentId);
+    }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Object> editTimeEntry(@PathVariable Long id, @RequestBody TimeEntryRequestDTO timeEntry) {
@@ -89,17 +91,16 @@ public class TimeEntryController {
 
     @GetMapping("/filter")
     public ResponseEntity<Object> getByFilter(
-            @RequestParam(required = false) Long studentId,
             @RequestParam(required = false) TaskType type,
-            @RequestParam(required = false) boolean expression,
-            @PageableDefault(page = 0, size = 10, sort = "title") Pageable pageable) {
+            @RequestParam(defaultValue = "false", required = false) boolean isBillable,
+            @RequestParam(defaultValue = "type") String sort) {
         logger.info("Received request to get TimeEntries with filter");
-        try {
-            return ResponseEntity.ok(timeEntryService.getByFilter(type, studentId, expression, pageable));
-        } catch (Exception e) {
-            logger.error("Error while getting filtered TimeEntries. Error: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        if (!List.of("type", "isBillable", "id").contains(sort)) {
+            sort = "type";
         }
+        Sort sortOrder = Sort.by(sort);
+        Pageable pageable = PageRequest.of(0, 10, sortOrder);
+        return ResponseEntity.ok(timeEntryService.getByFilter(type, isBillable, pageable));
     }
 
     @DeleteMapping("/{id}")

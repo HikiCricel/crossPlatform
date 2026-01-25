@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,10 +132,16 @@ public class TimeEntryService {
         throw new EntityNotFoundException("There's no TimeEntry with ID: " + id.toString());
     }
 
-    public Page<TimeEntry> getByFilter(TaskType type, Long studentId, boolean expression, Pageable pageable) {
-        Page<TimeEntry> result = timeEntryRepository.findAll(
-                TimeEntrySpecifications.filter(type, studentId, expression),
+    public Page<TimeEntryResponseDTO> getByFilter(TaskType type, boolean isBillable, Pageable pageable) {
+        Page<TimeEntry> timeEntryPage = timeEntryRepository.findAll(
+                TimeEntrySpecifications.filter(type, isBillable),
                 pageable);
+
+        List<TimeEntryResponseDTO> dtoList = timeEntryPage.getContent().stream()
+                .map(TimeEntryMapper::timeEntryToTimeEntryResponseDTO).toList();
+
+        Page<TimeEntryResponseDTO> result = new PageImpl<>(dtoList, pageable, timeEntryPage.getTotalElements());
+
         logger.info("Successfully filtered TimeEntries. Found {} results", result.getNumberOfElements());
         return result;
     }

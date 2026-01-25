@@ -5,8 +5,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -52,14 +53,14 @@ public class StudentController {
         }
     }
 
-    // @GetMapping
-    // public List<StudentResponseDTO> getStudents(@RequestParam(required = false)
-    // String name) {
-    // if (name == null)
-    // return studentService.getAll();
-    // else
-    // return studentService.getAllByGroup(name);
-    // }
+    @GetMapping("/group")
+    public List<StudentResponseDTO> getStudents(@RequestParam(required = false) String group) {
+        logger.info("Received request to get Students with group: {}", group);
+        if (group == null)
+            return studentService.getAll();
+        else
+            return studentService.getAllByGroup(group);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<StudentResponseDTO> getStudent(@PathVariable Long id) {
@@ -112,11 +113,16 @@ public class StudentController {
     @GetMapping("/filter")
     public ResponseEntity<Object> getByFilter(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String title,
-            @PageableDefault(page = 0, size = 10, sort = "title") Pageable pageable) {
+            @RequestParam(required = false) String group,
+            @RequestParam(defaultValue = "name") String sort) {
         logger.info("Received request to get Students with filter");
         try {
-            return ResponseEntity.ok(studentService.getByFilter(name, title, pageable));
+            if (!List.of("name", "group", "id").contains(sort)) {
+                sort = "name";
+            }
+            Sort sortOrder = Sort.by(sort);
+            Pageable pageable = PageRequest.of(0, 10, sortOrder);
+            return ResponseEntity.ok(studentService.getByFilter(name, group, pageable));
         } catch (Exception e) {
             logger.error("Error while getting filtered Students. Error: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

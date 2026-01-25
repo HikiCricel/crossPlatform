@@ -5,15 +5,10 @@ import org.springframework.data.jpa.domain.Specification;
 import com.example.crossPlatform.enums.TaskType;
 import com.example.crossPlatform.model.TimeEntry;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class TimeEntrySpecifications {
-    private static Specification<TimeEntry> studentIdLike(Long studentId) {
-        return (root, query, criteriaBuilder) -> {
-            if (studentId == null) {
-                return null;
-            }
-            return criteriaBuilder.equal(root.get("studentId"), studentId);
-        };
-    }
 
     private static Specification<TimeEntry> typeLike(TaskType type) {
         return (root, query, criteriaBuilder) -> {
@@ -24,16 +19,15 @@ public class TimeEntrySpecifications {
         };
     }
 
-    private static Specification<TimeEntry> isBillableLike(boolean expr) {
+    private static Specification<TimeEntry> isBillableLike(boolean isBillable) {
         return (root, query, criteriaBuilder) -> {
-            return criteriaBuilder.equal(root.get("isBillable"), expr);
+            return criteriaBuilder.equal(root.get("isBillable"), isBillable);
         };
     }
 
-    public static Specification<TimeEntry> filter(TaskType type, Long studentId, boolean expression) {
+    public static Specification<TimeEntry> filter(TaskType type, boolean expression) {
         return Specification.allOf(
                 typeLike(type),
-                studentIdLike(studentId),
                 isBillableLike(expression));
     }
 }

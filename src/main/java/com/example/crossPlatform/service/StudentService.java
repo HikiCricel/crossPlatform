@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,8 +99,14 @@ public class StudentService {
         throw new EntityNotFoundException("There's no Student with ID: " + id.toString());
     }
 
-    public Page<Student> getByFilter(String name, String group, Pageable pageable) {
-        Page<Student> result = studentRepository.findAll(StudentSpecifications.filter(name, group), pageable);
+    public Page<StudentResponseDTO> getByFilter(String name, String group, Pageable pageable) {
+        Page<Student> studentPage = studentRepository.findAll(StudentSpecifications.filter(name, group), pageable);
+
+        List<StudentResponseDTO> dtoList = studentPage.getContent().stream()
+                .map(StudentMapper::studentToStudentResponseDTO).toList();
+
+        Page<StudentResponseDTO> result = new PageImpl<>(dtoList, pageable, studentPage.getTotalElements());
+
         logger.info("Successfully filtered Students. Found {} results", result.getNumberOfElements());
         return result;
     }
