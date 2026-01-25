@@ -67,4 +67,4 @@ telegram:
         chat-id: ${chat-id}
 ---
 report:
-    template-location: classpath:templates/report-template.xlsx
+    template-location: classpath:templates/report-templates.xlsx
